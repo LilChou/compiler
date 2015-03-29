@@ -1,0 +1,75 @@
+%{
+int i;
+int count=1;
+int comment_line=1;
+%}
+
+number		0|[1-9]+[0-9]*
+letter		[a-zA-Z]
+identifier	[a-zA-Z_][a-zA-Z_0-9]*
+
+%Start COMMENT
+
+
+%%
+
+\n			count++; //Record lines here
+"//".*			{printf("#%d\tcomment\n", count);}
+"/*".*			{printf("#%d\tcomment\n", count);       comment_line=count;	BEGIN COMMENT;}
+<COMMENT>"*/"		{if(comment_line != count) printf("#%d\tcomment\n", count);       BEGIN INITIAL;}
+<COMMENT>[identifier.]	;
+"return"		printf("#%d\treturn\n", count);
+int			printf("#%d\tdata type\t: int\n",count);
+char 			printf("#%d\tdata type\t: char\n", count);
+double			printf("#%d\tdata type\t: double\n", count);
+{number}		printf("#%d\tnumber\t\t: %s\n", count, yytext);
+[']{letter}[']		printf("#%d\t'\n#%d\tcharacter\t: %c\n#%d\t'\n", count, count, yytext[1], count);
+
+
+"=="			printf("#%d\toperator\t: ==\n", count);
+"+="                    printf("#%d\toperator\t: +=\n", count);
+"-="                    printf("#%d\toperator\t: -=\n", count);
+"*="                    printf("#%d\toperator\t: *=\n", count);
+"/="                    printf("#%d\toperator\t: /=\n", count);
+"!="                    printf("#%d\toperator\t: !=\n", count);
+">="                    printf("#%d\toperator\t: >=\n", count);
+"<="                    printf("#%d\toperator\t: <=\n", count);
+
+
+"+"			printf("#%d\toperator\t: +\n", count);
+"-"			printf("#%d\toperator\t: -\n", count);
+"*"			printf("#%d\toperator\t: *\n", count);
+"/"			printf("#%d\toperator\t: /\n", count);
+"="			printf("#%d\toperator\t: =\n", count);
+"\\"                     printf("#%d\toperator\t: \\\n", count);
+"^"                     printf("#%d\toperator\t: ^\n", count);
+"?"                     printf("#%d\toperator\t: ?\n", count);
+"|"                     printf("#%d\toperator\t: |\n", count);
+"$"                     printf("#%d\toperator\t: $\n", count);
+"<"                     printf("#%d\toperator\t: <\n", count);
+">"                     printf("#%d\toperator\t: >\n", count);
+"("			printf("#%d\t(\n", count);
+")"                     printf("#%d\t)\n", count);
+"{"                     printf("#%d\t{\n", count);
+"}"                     printf("#%d\t}\n", count);
+";"                     printf("#%d\t;\n", count);
+","                     printf("#%d\t,\n", count);
+"'"                     printf("#%d\t'\n", count);
+"."                     printf("#%d\t.\n", count);
+"["                     printf("#%d\t[\n", count);
+"]"                     printf("#%d\t]\n", count);
+{identifier}"("		{i=0;	while(yytext[i++]!='(');	yytext[i-1]='\0';	
+			printf("#%d\tfunction ID\t: %s\n#%d\t(\n", count, yytext, count);}
+
+<INITIAL>{identifier}	printf("#%d\tvariable ID\t: %s\n", count, yytext);
+
+<COMMENT>.		;
+.
+
+
+
+%%
+int main(){
+	yylex();
+	return 0;
+}
