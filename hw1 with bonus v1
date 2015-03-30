@@ -34,6 +34,9 @@ double			printf("#%d\tdata type\t: double\n", count);
 "!="                    printf("#%d\toperator\t: !=\n", count);
 ">="                    printf("#%d\toperator\t: >=\n", count);
 "<="                    printf("#%d\toperator\t: <=\n", count);
+"++"                    printf("#%d\toperator\t: ++\n", count);
+"--"                    printf("#%d\toperator\t: --\n", count);
+
 
 
 "+"			printf("#%d\toperator\t: +\n", count);
