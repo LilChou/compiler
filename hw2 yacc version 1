@@ -1,0 +1,65 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+%token TYPE, NUM, ID, FUNC, END, CHAR
+%start program
+
+
+%%
+program:	state  program	{printf("state program -> program\n");}
+	|	state			{printf("state -> program\n");}
+	;
+
+state:		TYPE decl 		{printf("TYPE decl -> state\n");}	
+	|	decl			{printf("decl -> state\n");}
+	|	END			{printf("END -> state\n");}
+	|	'{'			{printf("'{' -> state\n");}
+	|	'}'			{printf("'}' -> state\n");}
+	;
+
+decl:		ID '=' choose		{printf("ID '=' choose -> decl\n");}
+	|	expr			{printf("expr -> decl\n");}
+	|	FUNC arg 		{printf("FUNC '(' arg -> decl\n");}
+	;
+
+choose:		expr			{printf("expr -> choose\n");}
+	|	CHAR 			{printf("CHAR -> choose\n");}
+	|	FUNC arg		{printf("FUNC '(' arg -> choose\n");}
+	;
+
+arg:		')' 	 		{printf("')' -> arg\n");}	
+	|	multiarg ')'  		{printf("multiarg -> arg\n");}
+	;
+
+multiarg:	state ',' multiarg 	{printf("state ',' multiarg -> multiarg\n");}
+	|	state			{printf("state -> multiarg\n");}
+	;
+
+expr:		''' CHAR '''		{$$ = $2; printf("CHAR -> expr\n");}
+	|	term '+' expr		{ $$ = $1 + $3;	printf("term '+' expr -> expr\n");}
+	|	term '-' expr		{ $$ = $1 - $3;	printf("term '-' expr -> expr\n");}
+	|	term			{printf("term -> expr\n");}
+	;
+
+term:		factor '*' term		{ $$ = $1 * $3; printf("factor '*' term -> term\n");}
+	|	factor '/' term		{ $2=0; while($1>$3){ $2++;	$1=$1-$3;}	$$ = $2; printf("factor '/' term -> term\n");}
+	|	factor			{printf("factor -> term\n");}
+	;
+
+factor:		'(' expr ')'		{ $$ = $2;printf("'(' expr ')' -> factor\n");}
+	|	ID			{printf("ID -> factor\n");}
+	|	NUM			{printf("NUM -> factor\n");}
+	;
+%%
+int yyerror(char *s) {
+	printf("OopS!!\n");
+	//fprintf(stderr, "line %d: %s\n:", lineno, s);
+}
+
+int main()
+{
+	yyparse();
+	fflush(NULL);
+	return 0;
+}
