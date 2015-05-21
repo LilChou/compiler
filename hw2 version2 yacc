@@ -1,0 +1,65 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+%token TYPE, NUM, ID, FUNC, END, CHAR
+%start program
+
+
+%%
+program:	state program				{printf("state program -> program\n");}
+		|	state						{printf("state -> program\n");}
+		;
+state:		TYPE FUNC function			{printf("TYPE FUNC '(' function -> state\n");}
+		|	content						{printf("content -> state\n");}
+		;
+function:	')'	choose					{printf("')' choose -> function\n");}
+		|	arg	')'	choose				{printf("arg ')' choose -> function\n");}
+		;
+arg: 		TYPE ID 					{printf("TYPE ID -> arg\n");}
+		|	TYPE ID multiarg			{printf("TYPE ID multiarg -> arg\n");}
+		;
+multiarg:	',' arg						{printf("',' arg -> multiarg\n");}
+		;
+choose:		';'							{printf("';' -> choose\n");}
+		|	'{'	content '}'				{printf("'{' content '}' -> choose\n");}
+		;
+content:	TYPE declare ';' content	{printf("TYPE declare ';' content -> content\n");}
+		|	declare ';'	content			{printf("declare ';' content -> content\n");}
+		|	END expr ';'				{printf("END expr ';' -> content\n");}
+		;
+declare:	ID 							{printf("ID -> declare\n");}
+		|	ID '=' expr					{printf("ID '=' expr -> declare\n");}
+		|	ID '=' FUNC arg1 ')'		{printf("ID '=' FUNC '(' arg ')' -> declare\n");}
+		;
+arg1:		expr 						{printf("expr -> arg1\n");}
+		|	expr multiarg1				{printf("expr multiarg1 -> arg1\n");}
+		;
+multiarg1:	',' arg1					{printf("',' arg1 -> multiarg1\n");}
+		;	
+expr:		expr '+' term				{printf("expr '+' term -> expr\n");}
+		|	expr '-' term				{printf("expr '-' term -> expr\n");}
+		|	term						{printf("term -> expr\n");}
+		|	CHAR 						{printf("CHAR -> expr\n");}
+		;
+term:		term '*' factor				{printf("term '*' factor -> term\n");}
+		|	term '/' factor				{printf("term '/' factor -> term\n");}
+		|	factor						{printf("factor -> term\n");}
+		;
+factor:		'(' expr ')'				{printf("'(' expr ')' -> factor\n");}
+		|	ID 							{printf("ID -> factor\n");}
+		|	NUM							{printf("NUM -> factor\n");}
+		;
+
+%%
+int yyerror(char *s) {
+	printf("OopS!!\n");
+	//fprintf(stderr, "line %d: %s\n:", lineno, s);
+}
+
+int main()
+{
+	yyparse();
+	fflush(NULL);
+	return 0;
+}
